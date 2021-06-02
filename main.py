@@ -1,7 +1,10 @@
 import PySimpleGUI as sg
 import brainflow as bf
+from brainflow.board_shim import BoardShim, BrainFlowInputParams
+from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 import keyboard as kb
 import random as rd
+
 
 class ExperimentProgram:
 
@@ -12,22 +15,22 @@ class ExperimentProgram:
     thumb = ' '
     test_length = 10
 
-    def leftHandMap(self):
+    def left_hand_map(self):
         self.index = 'f'
         self.middle = 'd'
         self.ring = 's'
         self.pinky = 'a'
         self.thumb = ' '
 
-    def rightHandMap(self):
+    def right_hand_map(self):
         self.index = 'j'
         self.middle = 'k'
         self.ring = 'l'
         self.pinky = ';'
         self.thumb = ' '
 
-    def set_test_length(self,new_test_length):
-        self.test_length=new_test_length
+    def set_test_length(self, new_test_length):
+        self.test_length = new_test_length
 
     def run_battery(self, order):
         for finger in order:
