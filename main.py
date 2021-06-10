@@ -1,6 +1,8 @@
+import time
+
 import PySimpleGUI as sg
 import brainflow as bf
-from brainflow.board_shim import BoardShim, BrainFlowInputParams
+from brainflow.board_shim import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 import keyboard as kb
 import random as rd
@@ -13,7 +15,7 @@ class ExperimentProgram:
     ring = 's'
     pinky = 'a'
     thumb = ' '
-    test_length = 10
+    test_length = 2
     board = 0
 
     def left_hand_map(self):
@@ -36,8 +38,10 @@ class ExperimentProgram:
         # Com port needs to be set on a by device basis
         params = BrainFlowInputParams()
         params.serial_port = "COM3"
-        self.board = BoardShim(board_id, params)
+        #self.board = BoardShim(board_id, params)
+        self.board = BoardShim(BoardIds.SYNTHETIC_BOARD.value, params)
         self.board.prepare_session()
+        time.sleep(5)
 
     def set_test_length(self, new_test_length):
         self.test_length = new_test_length
@@ -54,7 +58,7 @@ class ExperimentProgram:
                     break
         data = self.board.get_board_data()
         self.board.stop_stream()
-        return battery
+        return data
 
     def generate_battery(self):
         order = [(self.index, 1), (self.middle, 2), (self.ring, 3), (self.pinky, 4), (self.thumb, 5)]
@@ -70,8 +74,15 @@ if __name__ == '__main__':
     battery = exp.generate_battery()
     print(battery)
     res = []
+    print("When you are ready to begin press the space bar!")
+    while True:
+        if kb.is_pressed(" "):
+            break
+    time.sleep(0.5)
     for order in battery:
         res.append(exp.run_battery(order))
+    for data in res:
+        DataFilter.write_file(data, 'output.csv', 'a')
 
 
 
