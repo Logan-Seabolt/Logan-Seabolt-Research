@@ -107,18 +107,19 @@ if __name__ == '__main__':
     res = []
     userID = input("Enter user ID number: ")
     exp.test_length = int(input("Enter number of experiments (15,30): "))
+    break_duration = float(input("Enter duration of break in minutes (1-5): "))
     handedness = input("Are you left or right handed? l/r? ")
-    if handedness[0] == 'l':
+    if handedness.lower()[0] == 'l':
         exp.left_hand_map()
     else:
         exp.right_hand_map()
     battery = exp.generate_battery()
-    tbattery = exp.generate_battery(5)
+    test_battery = exp.generate_battery(3)
     if debug:
         print(battery)
     while True:
-        if input("Would you like to practice the imagined movements? y/n: ")[0] == "y":
-            for bat in tbattery:
+        if input("Would you like to practice the imagined movements? y/n: ").lower()[0] == "y":
+            for bat in test_battery:
                 exp.run_battery_practice(bat)
         else:
             break
@@ -127,18 +128,27 @@ if __name__ == '__main__':
         if kb.is_pressed(" "):
             break
     time.sleep(0.5)
+    count = 0
     for order in battery:
+        if count%5 == 0:
+            print('Beginning a short user break, the break will last until you press the space bar')
+            while True:
+                if kb.is_pressed(" "):
+                    print("Resuming Experiment")
+                    break
+            time.sleep(0.5)
         res.append(exp.run_battery(order))
+        count+=1
     for data in res:
         DataFilter.write_file(data, userID+'_real_movement_output.csv', 'a')
     print("\n\nPreparing for imagined finger movement test")
     exp.calc_response_time()
     if debug:
         print("Average response time", exp.response_time, "seconds")
-    time.sleep(60*5) #enforce a 5 minute break
+    time.sleep(60*break_duration)
     while True:
-        if input("Would you like to practice the imagined movements? y/n: ")[0] == "y":
-            for bat in tbattery:
+        if input("Would you like to practice the imagined movements? y/n: ").lower()[0] == "y":
+            for bat in test_battery:
                 exp.run_battery_imagined_practice(bat)
         else:
             break
@@ -149,8 +159,17 @@ if __name__ == '__main__':
     time.sleep(0.5)
     res.clear()
     battery = exp.generate_battery()
+    count = 0
     for order in battery:
+        if count%5 == 0:
+            print('Beginning a short user break, the break will last until you press the space bar')
+            while True:
+                if kb.is_pressed(" "):
+                    print("Resuming Experiment")
+                    break
+            time.sleep(0.5)
         res.append(exp.run_battery_imagined(order))
+        count += 1
     for data in res:
         DataFilter.write_file(data, userID+'_imagined_movement_output.csv', 'a')
 
