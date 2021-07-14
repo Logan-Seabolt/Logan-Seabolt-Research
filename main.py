@@ -62,6 +62,7 @@ class ExperimentProgram:
                     self.board.insert_marker(finger[1])
                     break
             self.response_time += time.time()-start
+            time.sleep(0.5)
         data = self.board.get_board_data()
         self.board.stop_stream()
         return data
@@ -73,6 +74,7 @@ class ExperimentProgram:
             while True:
                 if kb.is_pressed(fing):
                     break
+            time.sleep(0.5)
 
     def run_battery_imagined(self, order):
         self.board.start_stream(4500)
@@ -80,8 +82,15 @@ class ExperimentProgram:
             fing = finger[0]
             print("Please imagine pressing: \"", fing, "\"")
             self.board.insert_marker(finger[1])
-            time.sleep(self.response_time)
+            start = time.time()
+            while time.time() - start < self.response_time:
+                if kb.is_pressed(self.index) or kb.is_pressed(self.middle) or kb.is_pressed(self.ring) or kb.is_pressed(
+                        self.pinky) or kb.is_pressed(self.thumb):
+                    print("You pressed a key, test is invalid")
+                    self.board.insert_marker(-1)
+                    break
             self.board.insert_marker(finger[1])
+            time.sleep(0.5)
         data = self.board.get_board_data()
         self.board.stop_stream()
         return data
@@ -90,7 +99,12 @@ class ExperimentProgram:
         for finger in order:
             fing = finger[0]
             print("Please imagine pressing: \"", fing, "\"")
-            time.sleep(self.response_time)
+            start = time.time()
+            while time.time()-start < self.response_time:
+                if kb.is_pressed(self.index) or kb.is_pressed(self.middle) or kb.is_pressed(self.ring) or kb.is_pressed(self.pinky) or kb.is_pressed(self.thumb):
+                    print("You pressed a key, test is invalid")
+                    break
+            time.sleep(0.5)
 
     def generate_battery(self, tlength=test_length):
         order = [(self.index, 1), (self.middle, 2), (self.ring, 3), (self.pinky, 4), (self.thumb, 5)]
@@ -118,7 +132,7 @@ if __name__ == '__main__':
     if debug:
         print(battery)
     while True:
-        if input("Would you like to practice the imagined movements? y/n: ").lower()[0] == "y":
+        if input("Would you like to practice the experiment movements? y/n: ").lower()[0] == "y":
             for bat in test_battery:
                 exp.run_battery_practice(bat)
         else:
@@ -128,9 +142,9 @@ if __name__ == '__main__':
         if kb.is_pressed(" "):
             break
     time.sleep(0.5)
-    count = 0
+    count = 1
     for order in battery:
-        if count%5 == 0:
+        if count % 5 == 0:
             print('Beginning a short user break, the break will last until you press the space bar')
             while True:
                 if kb.is_pressed(" "):
@@ -138,7 +152,7 @@ if __name__ == '__main__':
                     break
             time.sleep(0.5)
         res.append(exp.run_battery(order))
-        count+=1
+        count += 1
     for data in res:
         DataFilter.write_file(data, userID+'_real_movement_output.csv', 'a')
     print("\n\nPreparing for imagined finger movement test")
@@ -159,7 +173,7 @@ if __name__ == '__main__':
     time.sleep(0.5)
     res.clear()
     battery = exp.generate_battery()
-    count = 0
+    count = 1
     for order in battery:
         if count%5 == 0:
             print('Beginning a short user break, the break will last until you press the space bar')
